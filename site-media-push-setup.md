@@ -35,4 +35,4 @@ O site precisa estar hospedado em HTTPS. Publique `index.html` (página inicial 
 
 4. Abra o site em cada dispositivo, toque em **Ativar notificações neste dispositivo** e permita as notificações. A foto de perfil do canal aparece como ícone.
 
-O navegador exige consentimento por dispositivo. Alguns navegadores móveis só entregam push com o site instalado na tela inicial. A inscrição pode ser removida nas configurações de notificações do próprio navegador/dispositivo.
+O navegador exige consentimento por dispositivo. No iPhone ou iPad, adicione o site à Tela de Início pelo menu **Compartilhar**, abra o ícone instalado e só então ative as notificações. Em outros dispositivos, use um navegador compatível e permita as notificações quando solicitado. A inscrição pode ser removida nas configurações de notificações do próprio navegador/dispositivo.
