@@ -1,0 +1,7 @@
+project_id = "zmfsomzlqcgsdeahcboc"
+
+[functions.manage-site-push]
+verify_jwt = false
+
+[functions.send-site-push]
+verify_jwt = true
