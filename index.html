@@ -5,7 +5,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="theme-color" content="#0c0d0d">
 	<meta name="description" content="Gameplays, terror e lives no canal Desconhecido MP3.">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'sha256-xZxt0UNZBaPq7PUqOjS1J1cyYBD4EtiH8O6v+U6JcTQ='; style-src 'self' https://fonts.googleapis.com 'sha256-1ibLiYz7/q26N3uoPkv4L1wDkS6ImaMHub2p0GIQ+Uw='; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://img.youtube.com https://cdn.simpleicons.org https://zmfsomzlqcgsdeahcboc.supabase.co; connect-src 'self' https://zmfsomzlqcgsdeahcboc.supabase.co; worker-src 'self'; manifest-src 'self'; upgrade-insecure-requests">
 	<title>Desconhecido MP3 | Gameplays</title>
+	<link rel="manifest" href="./manifest.webmanifest">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -85,6 +87,10 @@
 		.notification-footer { padding: 11px 16px; border-top: 1px solid var(--line); }
 		.notification-footer a { color: var(--accent-soft); font-size: 11px; font-weight: 800; text-decoration: none; }
 		.notification-footer a:hover { color: var(--text); }
+		.notification-enable { width: 100%; min-height: 38px; margin-bottom: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.025); color: var(--text); font: 700 11px "Manrope", sans-serif; cursor: pointer; }
+		.notification-enable:hover:not(:disabled) { border-color: var(--accent-soft); color: var(--accent-soft); }
+		.notification-enable:disabled { color: var(--muted); cursor: default; }
+		.notification-permission-status { margin: 0 0 8px; color: var(--muted); font-size: 10px; }
 		.nav-cta, .button {
 			display: inline-flex;
 			align-items: center;
@@ -292,6 +298,7 @@
 		.section-heading h2 { margin: 0; font: 600 clamp(25px, 4vw, 34px)/1.1 "Space Grotesk", sans-serif; letter-spacing: -.035em; }
 		.section-heading p { max-width: 370px; margin: 0; color: var(--muted); font-size: 13px; }
 		.video-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 20px; }
+		.video-grid[hidden] { display: none; }
 		.video-card { min-width: 0; text-decoration: none; }
 		.thumb-wrap { position: relative; overflow: hidden; aspect-ratio: 16 / 9; border: 1px solid rgba(255,255,255,.08); background: #292524; }
 		.thumb-wrap img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease, opacity .35s ease; }
@@ -374,9 +381,9 @@
 		.update-composer { display: grid; gap: 16px; margin: 0 0 24px; padding: 22px; border: 1px solid rgba(231,182,107,.3); background: rgba(21,22,21,.82); }
 		.update-composer[hidden] { display: none; }
 		.update-composer h3 { margin: 0; font: 400 22px "Bebas Neue", sans-serif; letter-spacing: .04em; }
-		.update-composer textarea, .update-composer input[type="text"], .update-composer input[type="file"] { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #44403e; border-radius: 0; background: #151414; color: var(--text); font: inherit; font-size: 13px; }
+		.update-composer textarea, .update-composer input[type="text"], .update-composer input[type="url"], .update-composer input[type="file"], .update-composer select { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #44403e; border-radius: 0; background: #151414; color: var(--text); font: inherit; font-size: 13px; }
 		.update-composer textarea { min-height: 120px; resize: vertical; }
-		.update-composer textarea:focus, .update-composer input:focus { border-color: var(--accent); outline: none; }
+		.update-composer textarea:focus, .update-composer input:focus, .update-composer select:focus { border-color: var(--accent); outline: none; }
 		.update-composer-note { margin: -8px 0 0; color: var(--muted); font-size: 11px; }
 		.update-empty { padding-block: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 		.feedback-heading { max-width: 640px; margin-bottom: 32px; }
@@ -611,7 +618,11 @@
 							<button class="notification-read-all" id="notification-read-all" type="button">Marcar todas como lidas</button>
 						</div>
 						<div class="notification-list" id="notification-list" aria-live="polite"></div>
-						<div class="notification-footer"><a href="#novidades" id="notification-view-updates">Ver todas as novidades ↗</a></div>
+						<div class="notification-footer">
+							<button class="notification-enable" id="notification-permission" type="button">Ativar notificações no dispositivo</button>
+							<p class="notification-permission-status" id="notification-permission-status" role="status" aria-live="polite"></p>
+							<a href="#novidades" id="notification-view-updates">Ver todas as novidades ↗</a>
+						</div>
 					</div>
 				</div>
 				<a class="nav-cta" href="https://www.youtube.com/@Unknownbygameplays" target="_blank" rel="noreferrer">Inscreva-se <span aria-hidden="true">↗</span></a>
@@ -669,6 +680,7 @@
 						<div class="video-meta"><div><p class="video-title">Bug do spray no Resident Evil 4</p><p class="video-subtitle">Dica de gameplay</p></div><span class="video-index">05</span></div>
 					</a>
 				</div>
+				<div class="video-grid" id="published-videos" hidden aria-label="Vídeos publicados pelo responsável"></div>
 			</section>
 
 			<section class="updates-section" id="novidades" aria-labelledby="updates-title">
@@ -678,7 +690,7 @@
 					<p>Acompanhe avisos, fotos e novidades do canal. Só o responsável verificado pode publicar; esta área é apenas para leitura dos visitantes.</p>
 				</div>
 				<details class="owner-access" id="owner-access">
-					<summary>Área do responsável · publicar novidades e responder feedbacks</summary>
+					<summary>Área do responsável · publicar vídeos, lives e novidades</summary>
 					<form class="owner-login-form" id="owner-login-form">
 						<div class="feedback-field">
 							<label for="owner-email">E-mail do responsável</label>
@@ -699,10 +711,22 @@
 					</div>
 				</details>
 				<form class="update-composer" id="update-form" hidden>
-					<h3>Publicar uma novidade</h3>
+					<h3>Publicar no site</h3>
 					<div class="feedback-field">
-						<label for="update-message">Mensagem</label>
+						<label for="update-content-type">O que você quer publicar?</label>
+						<select id="update-content-type" name="contentType">
+							<option value="update">Novidade</option>
+							<option value="video">Vídeo do YouTube</option>
+							<option value="live">Live ou replay do YouTube</option>
+						</select>
+					</div>
+					<div class="feedback-field">
+						<label for="update-message" id="update-message-label">Mensagem</label>
 						<textarea id="update-message" name="message" maxlength="2000" required placeholder="Conte o que há de novo..."></textarea>
+					</div>
+					<div class="feedback-field" id="update-youtube-field" hidden>
+						<label for="update-youtube-url">Link do vídeo ou da live no YouTube</label>
+						<input id="update-youtube-url" name="youtubeUrl" type="url" maxlength="2048" placeholder="https://www.youtube.com/watch?v=...">
 					</div>
 					<div class="feedback-field">
 						<label for="update-image">Foto (opcional, até 5 MB)</label>
@@ -712,7 +736,7 @@
 						<label for="update-image-alt">Descrição da foto (opcional)</label>
 						<input id="update-image-alt" name="imageAlt" type="text" maxlength="120" placeholder="Descreva a imagem para quem usa leitor de tela">
 					</div>
-					<p class="update-composer-note">As publicações ficam visíveis para todos. Visitantes não podem comentar nem publicar nesta área.</p>
+					<p class="update-composer-note">Vídeos, lives e novidades serão publicados no site. Somente a conta de responsável verificada pode publicar.</p>
 					<button class="feedback-submit" id="update-submit" type="submit">Publicar novidade</button>
 					<p class="update-status" id="update-form-status" role="status" aria-live="polite"></p>
 				</form>
@@ -738,6 +762,7 @@
 						<div class="video-meta"><div><p class="video-title">Replay de live</p><p class="video-subtitle">Assistir no YouTube</p></div></div>
 					</a>
 				</div>
+				<div class="video-grid" id="published-lives" hidden aria-label="Lives publicadas pelo responsável"></div>
 			</section>
 
 			<section class="story-section" id="sobre" aria-labelledby="about-title">
@@ -854,7 +879,7 @@
 	<footer>
 		<div class="footer-inner wrap">
 			<p>© <span id="year"></span> Desconhecido MP3</p>
-			<p>Feito para quem curte jogar junto.</p>
+			<p>Feito para quem curte jogar junto. <span>Versão 1.3.2026</span></p>
 		</div>
 	</footer>
 	</div>
@@ -912,9 +937,7 @@
 				return;
 			}
 			welcomeGate.hidden = true;
-			welcomeGate.style.display = "none";
 			siteContent.hidden = false;
-			siteContent.style.display = "block";
 			window.scrollTo({ top: 0, behavior: "auto" });
 		});
 		document.getElementById("year").textContent = new Date().getFullYear();
@@ -925,6 +948,8 @@
 		const updatesEndpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/site_updates`;
 		const updatesBucket = "site-updates";
 		const ownerSessionStorageKey = "desconhecidoMp3OwnerSession";
+		const pushSubscriptionEndpoint = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/manage-site-push`;
+		const pushNotificationEndpoint = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/send-site-push`;
 		const feedbackForm = document.getElementById("feedback-form");
 		const feedbackList = document.getElementById("feedback-list");
 		const feedbackStatus = document.getElementById("feedback-status");
@@ -934,18 +959,26 @@
 		const updateSubmit = document.getElementById("update-submit");
 		const updatesList = document.getElementById("updates-list");
 		const updatesStatus = document.getElementById("updates-status");
+		const publishedVideos = document.getElementById("published-videos");
+		const publishedLives = document.getElementById("published-lives");
 		const notificationStorageKey = "desconhecidoMp3NotificationsLastSeen";
 		const notificationToggle = document.getElementById("notification-toggle");
 		const notificationCount = document.getElementById("notification-count");
 		const notificationPanel = document.getElementById("notification-panel");
 		const notificationList = document.getElementById("notification-list");
 		const notificationReadAll = document.getElementById("notification-read-all");
+		const notificationPermissionButton = document.getElementById("notification-permission");
+		const notificationPermissionStatus = document.getElementById("notification-permission-status");
 		const notificationViewUpdates = document.getElementById("notification-view-updates");
 		const ownerLoginForm = document.getElementById("owner-login-form");
 		const ownerLoginStatus = document.getElementById("owner-login-status");
 		const ownerSession = document.getElementById("owner-session");
 		const ownerAccessSection = document.querySelector(".owner-access");
 		const ownerLogout = document.getElementById("owner-logout");
+		const updateContentType = document.getElementById("update-content-type");
+		const updateMessageLabel = document.getElementById("update-message-label");
+		const updateYoutubeField = document.getElementById("update-youtube-field");
+		const updateYoutubeUrl = document.getElementById("update-youtube-url");
 		const ratingInputs = [...feedbackForm.querySelectorAll('input[name="rating"]')];
 		let ownerAccessToken = "";
 		let ownerRefreshToken = "";
@@ -957,6 +990,79 @@
 			if (isOwner) ownerAccessSection.open = true;
 		};
 		const updateStarRating = (rating) => ratingInputs.forEach((input) => input.closest(".star-option").classList.toggle("is-selected", Number(input.value) <= rating));
+		const syncUpdateContentType = () => {
+			const contentType = updateContentType.value;
+			const hasYoutubeLink = contentType === "video" || contentType === "live";
+			updateYoutubeField.hidden = !hasYoutubeLink;
+			updateYoutubeUrl.required = hasYoutubeLink;
+			updateMessageLabel.textContent = hasYoutubeLink ? "Título ou descrição" : "Mensagem";
+			updateSubmit.textContent = contentType === "video"
+				? "Publicar vídeo"
+				: contentType === "live" ? "Publicar live" : "Publicar novidade";
+			document.getElementById("update-message").placeholder = hasYoutubeLink
+				? contentType === "live" ? "Ex.: Live de terror com a comunidade" : "Ex.: Gameplay de Poppy Playtime"
+				: "Conte o que há de novo...";
+		};
+		updateContentType.addEventListener("change", syncUpdateContentType);
+		syncUpdateContentType();
+		const parseYouTubeVideo = (value, contentType = "video") => {
+			try {
+				const url = new URL(value);
+				if (url.protocol !== "https:") return null;
+				let videoId = "";
+				if (url.hostname === "youtu.be") {
+					videoId = url.pathname.split("/").filter(Boolean)[0] || "";
+				} else if (["youtube.com", "www.youtube.com", "m.youtube.com"].includes(url.hostname)) {
+					if (url.pathname === "/watch") videoId = url.searchParams.get("v") || "";
+					else videoId = url.pathname.match(/^\/(?:embed|shorts|live)\/([A-Za-z0-9_-]{11})\/?$/)?.[1] || "";
+					if (
+						contentType === "live"
+						&& !videoId
+						&& /^\/@[A-Za-z0-9._-]{3,30}\/live\/?$/.test(url.pathname)
+					) {
+						return { id: "", url: `https://www.youtube.com/${url.pathname.slice(1).replace(/\/$/, "")}` };
+					}
+				}
+				if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return null;
+				return { id: videoId, url: `https://www.youtube.com/watch?v=${videoId}` };
+			} catch {
+				return null;
+			}
+		};
+		const createPublishedVideoCard = (entry) => {
+			const video = parseYouTubeVideo(entry.youtube_url, entry.content_type);
+			if (!video) return null;
+			const card = document.createElement("a");
+			card.className = "video-card";
+			card.href = video.url;
+			card.target = "_blank";
+			card.rel = "noopener noreferrer";
+			card.setAttribute("aria-label", `Assistir ${entry.content_type === "live" ? "live" : "vídeo"}: ${entry.message}`);
+			const thumbnail = document.createElement("div");
+			thumbnail.className = "thumb-wrap";
+			const image = document.createElement("img");
+			image.src = video.id ? `https://img.youtube.com/vi/${video.id}/hqdefault.jpg` : "channels4_profile.jpg";
+			image.alt = video.id ? `Thumbnail: ${entry.message}` : `Canal ao vivo: ${entry.message}`;
+			image.loading = "lazy";
+			const play = document.createElement("span");
+			play.className = "play-icon";
+			play.setAttribute("aria-hidden", "true");
+			play.textContent = "▶";
+			thumbnail.append(image, play);
+			const meta = document.createElement("div");
+			meta.className = "video-meta";
+			const text = document.createElement("div");
+			const title = document.createElement("p");
+			title.className = "video-title";
+			title.textContent = entry.message;
+			const subtitle = document.createElement("p");
+			subtitle.className = "video-subtitle";
+			subtitle.textContent = entry.content_type === "live" ? "Live ou replay · YouTube" : "Vídeo · YouTube";
+			text.append(title, subtitle);
+			meta.append(text);
+			card.append(thumbnail, meta);
+			return card;
+		};
 		ratingInputs.forEach((input) => input.addEventListener("change", () => updateStarRating(Number(input.value))));
 		feedbackForm.addEventListener("reset", () => window.setTimeout(() => updateStarRating(0), 0));
 		const showFeedbackMessage = (message) => {
@@ -1144,7 +1250,9 @@
 					item.className = "notification-item";
 					if (isNotificationNewer(entry.id, lastSeenId)) item.classList.add("is-unread");
 					const title = document.createElement("strong");
-					title.textContent = "Nova novidade";
+					title.textContent = entry.content_type === "video"
+						? "Novo vídeo"
+						: entry.content_type === "live" ? "Nova live" : "Nova novidade";
 					const message = document.createElement("p");
 					message.textContent = entry.message.length > 140 ? `${entry.message.slice(0, 137)}...` : entry.message;
 					const date = document.createElement("time");
@@ -1159,6 +1267,82 @@
 			}
 			notificationReadAll.disabled = unreadEntries.length === 0;
 		};
+		const refreshNotificationPermissionButton = () => {
+			if (!window.isSecureContext || !("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+				notificationPermissionButton.disabled = true;
+				notificationPermissionStatus.textContent = "Push requer um navegador compatível e site hospedado em HTTPS.";
+				return;
+			}
+			if (Notification.permission === "denied") {
+				notificationPermissionButton.disabled = true;
+				notificationPermissionStatus.textContent = "Notificações bloqueadas. Altere a permissão nas configurações do navegador.";
+			} else {
+				notificationPermissionButton.disabled = false;
+				notificationPermissionButton.textContent = Notification.permission === "granted"
+					? "Sincronizar notificações neste dispositivo"
+					: "Ativar notificações neste dispositivo";
+				notificationPermissionStatus.textContent = "Você pode desativá-las nas configurações do navegador.";
+			}
+		};
+		const decodePushKey = (value) => {
+			const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+			const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+			return Uint8Array.from(atob(padded), (character) => character.charCodeAt(0));
+		};
+		notificationPermissionButton.addEventListener("click", async () => {
+			if (!window.isSecureContext || !("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+				refreshNotificationPermissionButton();
+				return;
+			}
+			notificationPermissionButton.disabled = true;
+			notificationPermissionStatus.textContent = "Preparando as notificações...";
+			let subscription;
+			try {
+				const configResponse = await fetch(pushSubscriptionEndpoint, {
+					method: "POST",
+					headers: { apikey: supabasePublishableKey, "Content-Type": "application/json" },
+					body: JSON.stringify({ action: "config" })
+				});
+				const pushConfig = await configResponse.json();
+				if (!configResponse.ok) throw new Error(pushConfig.error || "Não foi possível carregar a configuração de push do Supabase.");
+				if (typeof pushConfig.vapidPublicKey !== "string" || !pushConfig.vapidPublicKey) {
+					throw new Error("A chave pública de push ainda não foi configurada no Supabase.");
+				}
+				const permission = Notification.permission === "granted"
+					? "granted"
+					: await Notification.requestPermission();
+				if (permission !== "granted") throw new Error("Permissão não concedida. Você pode ativá-la nas configurações do navegador.");
+				const registration = await navigator.serviceWorker.register("./sw.js");
+				await navigator.serviceWorker.ready;
+				subscription = await registration.pushManager.getSubscription();
+				if (!subscription) {
+					subscription = await registration.pushManager.subscribe({
+						userVisibleOnly: true,
+						applicationServerKey: decodePushKey(pushConfig.vapidPublicKey)
+					});
+				}
+				const saveResponse = await fetch(pushSubscriptionEndpoint, {
+					method: "POST",
+					headers: { apikey: supabasePublishableKey, "Content-Type": "application/json" },
+					body: JSON.stringify({ action: "subscribe", subscription: subscription.toJSON() })
+				});
+				const saveResult = await saveResponse.json();
+				if (!saveResponse.ok) throw new Error(saveResult.error || "Não foi possível salvar a inscrição de notificações no Supabase.");
+				notificationPermissionStatus.textContent = "Pronto! Este dispositivo receberá avisos de novas publicações.";
+			} catch (error) {
+				if (subscription) {
+					try {
+						await subscription.unsubscribe();
+					} catch (unsubscribeError) {
+						console.error("Não foi possível cancelar a inscrição push incompleta.", unsubscribeError);
+					}
+				}
+				notificationPermissionStatus.textContent = error.message || "Não foi possível ativar as notificações.";
+			} finally {
+				notificationPermissionButton.disabled = Notification.permission === "denied";
+			}
+		});
+		refreshNotificationPermissionButton();
 		notificationToggle.addEventListener("click", () => {
 			const shouldOpen = notificationPanel.hidden;
 			notificationPanel.hidden = !shouldOpen;
@@ -1208,7 +1392,7 @@
 			updatesStatus.textContent = "";
 			showUpdatesMessage("Carregando novidades...");
 			try {
-				const response = await fetch(`${updatesEndpoint}?select=id,message,image_url,image_alt,created_at&order=created_at.desc&limit=50`, {
+				const response = await fetch(`${updatesEndpoint}?select=id,message,image_url,image_alt,content_type,youtube_url,created_at&order=created_at.desc&limit=50`, {
 					headers: { apikey: supabasePublishableKey }
 				});
 				if (!response.ok) throw new Error(`Supabase respondeu ${response.status}`);
@@ -1216,11 +1400,24 @@
 				if (!Array.isArray(entries)) throw new Error("Resposta inválida do Supabase");
 				renderNotifications(entries);
 				updatesList.replaceChildren();
+				publishedVideos.replaceChildren();
+				publishedLives.replaceChildren();
+				publishedVideos.hidden = true;
+				publishedLives.hidden = true;
 				if (entries.length === 0) {
 					showUpdatesMessage("Ainda não há novidades. Volte em breve!");
 					return;
 				}
 				entries.forEach((entry) => {
+					const contentType = ["video", "live"].includes(entry.content_type) ? entry.content_type : "update";
+					if (contentType !== "update") {
+						const videoCard = createPublishedVideoCard({ ...entry, content_type: contentType });
+						if (videoCard) {
+							const target = contentType === "live" ? publishedLives : publishedVideos;
+							target.append(videoCard);
+							target.hidden = false;
+						}
+					}
 					const article = document.createElement("article");
 					article.className = "update-card";
 					const header = document.createElement("header");
@@ -1264,7 +1461,7 @@
 					updatesList.append(article);
 				});
 			} catch {
-				updatesStatus.textContent = "Não foi possível carregar as novidades. Aplique updates-schema.sql no Supabase e confira sua conexão.";
+				updatesStatus.textContent = "Não foi possível carregar as novidades. Aplique updates-schema.sql e site-media-push-schema.sql no Supabase e confira sua conexão.";
 				showUpdatesMessage("As novidades não puderam ser carregadas agora. Tente novamente mais tarde.");
 			}
 		};
@@ -1307,6 +1504,29 @@
 			if (!await verifyOwner(session.access_token)) throw new Error("Esta conta não está autorizada a administrar o site.");
 			storeOwnerSession(session);
 			return ownerAccessToken;
+		};
+		const sendSitePushNotification = async (entry) => {
+			const accessToken = await getValidOwnerAccessToken();
+			const title = entry.content_type === "video"
+				? "Novo vídeo no Desconhecido MP3"
+				: entry.content_type === "live" ? "Nova live no Desconhecido MP3" : "Nova publicação no Desconhecido MP3";
+			const response = await fetch(pushNotificationEndpoint, {
+				method: "POST",
+				headers: {
+					apikey: supabasePublishableKey,
+					Authorization: `******`,
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({
+					title,
+					body: entry.message.slice(0, 160),
+					url: window.location.href.split("#")[0]
+				})
+			});
+			const result = await response.json();
+			if (!response.ok) throw new Error(result.error || `O Supabase respondeu ${response.status} ao enviar notificações.`);
+			if (!Number.isInteger(result.sent) || result.sent < 0) throw new Error("Resposta inválida do serviço de notificações.");
+			return result.sent;
 		};
 		const restoreOwnerSession = async () => {
 			let savedSession;
@@ -1429,11 +1649,19 @@
 			}
 			if (!updateForm.reportValidity()) return;
 			const formData = new FormData(updateForm);
+			const contentType = String(formData.get("contentType"));
 			const message = String(formData.get("message")).trim().slice(0, 2000);
 			const imageAlt = String(formData.get("imageAlt")).trim().slice(0, 120);
 			const imageFile = formData.get("image");
 			if (!message) {
 				updateFormStatus.textContent = "Escreva uma mensagem antes de publicar.";
+				return;
+			}
+			const youtubeVideo = contentType === "update"
+				? null
+				: parseYouTubeVideo(String(formData.get("youtubeUrl")).trim(), contentType);
+			if (!["update", "video", "live"].includes(contentType) || (contentType !== "update" && !youtubeVideo)) {
+				updateFormStatus.textContent = "Informe um link válido de vídeo ou live do YouTube.";
 				return;
 			}
 			if (imageFile instanceof File && imageFile.size > 5 * 1024 * 1024) {
@@ -1451,7 +1679,7 @@
 				return;
 			}
 			updateSubmit.disabled = true;
-			updateFormStatus.textContent = "Publicando novidade...";
+			updateFormStatus.textContent = "Publicando...";
 			try {
 				const accessToken = await getValidOwnerAccessToken();
 				let imageUrl = null;
@@ -1478,12 +1706,27 @@
 						"Content-Type": "application/json",
 						Prefer: "return=minimal"
 					},
-					body: JSON.stringify({ message, image_url: imageUrl, image_alt: imageAlt })
+					body: JSON.stringify({
+						message,
+						image_url: imageUrl,
+						image_alt: imageAlt,
+						content_type: contentType,
+						youtube_url: youtubeVideo?.url || null
+					})
 				});
-				if (!response.ok) throw new Error("Não foi possível salvar a novidade. Confira o esquema e as permissões do Supabase.");
+				if (!response.ok) throw new Error("Não foi possível salvar. Aplique site-media-push-schema.sql no Supabase e confira as permissões.");
 				updateForm.reset();
-				updateFormStatus.textContent = "Novidade publicada!";
+				syncUpdateContentType();
+				updateFormStatus.textContent = "Publicado. Enviando notificações...";
 				await renderUpdates();
+				try {
+					const sent = await sendSitePushNotification({ content_type: contentType, message });
+					updateFormStatus.textContent = sent
+						? `Publicado! Notificação enviada para ${sent} dispositivo(s).`
+						: "Publicado! Ainda não há dispositivos inscritos para receber notificações.";
+				} catch (error) {
+					updateFormStatus.textContent = `Publicado, mas não foi possível enviar as notificações. ${error.message}`;
+				}
 			} catch (error) {
 				updateFormStatus.textContent = error.message || "Não foi possível publicar. Entre novamente e tente outra vez.";
 			} finally {
