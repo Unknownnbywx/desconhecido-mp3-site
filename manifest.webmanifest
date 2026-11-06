@@ -1,0 +1,18 @@
+{
+  "name": "Desconhecido MP3",
+  "short_name": "Desconhecido MP3",
+  "description": "Gameplays, terror e lives no canal Desconhecido MP3.",
+  "start_url": "./UnknownMP3SITEEE.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c0d0d",
+  "theme_color": "#0c0d0d",
+  "icons": [
+    {
+      "src": "./channels4_profile.jpg",
+      "sizes": "1280x1280",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
