@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="theme-color" content="#0c0d0d">
 	<meta name="description" content="Gameplays, terror e lives no canal Desconhecido MP3.">
-	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'sha256-xZxt0UNZBaPq7PUqOjS1J1cyYBD4EtiH8O6v+U6JcTQ='; style-src 'self' https://fonts.googleapis.com 'sha256-1ibLiYz7/q26N3uoPkv4L1wDkS6ImaMHub2p0GIQ+Uw='; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://img.youtube.com https://cdn.simpleicons.org https://zmfsomzlqcgsdeahcboc.supabase.co; connect-src 'self' https://zmfsomzlqcgsdeahcboc.supabase.co; worker-src 'self'; manifest-src 'self'; upgrade-insecure-requests">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'sha256-puQXEOgHR81d1ksWBGBFdb4DS/cl3VYRSO6uXHupNwo='; style-src 'self' https://fonts.googleapis.com 'sha256-YcWfTjHEPQEU+/9WhAECorhV11haeTUgk7GrVpD8lwk='; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://img.youtube.com https://cdn.simpleicons.org https://zmfsomzlqcgsdeahcboc.supabase.co; connect-src 'self' https://zmfsomzlqcgsdeahcboc.supabase.co; worker-src 'self'; manifest-src 'self'; upgrade-insecure-requests">
 	<title>Desconhecido MP3 | Gameplays</title>
 	<link rel="manifest" href="./manifest.webmanifest">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -84,7 +84,7 @@
 		.notification-item p { margin: 0 0 5px; color: #c1bfbc; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
 		.notification-item time { color: var(--muted); font-size: 10px; }
 		.notification-empty { margin: 0; padding: 17px 16px; color: var(--muted); font-size: 12px; }
-		.notification-footer { padding: 11px 16px; border-top: 1px solid var(--line); }
+		.notification-footer { position: sticky; bottom: 0; z-index: 1; padding: 11px 16px; border-top: 1px solid var(--line); background: #151615; }
 		.notification-footer a { color: var(--accent-soft); font-size: 11px; font-weight: 800; text-decoration: none; }
 		.notification-footer a:hover { color: var(--text); }
 		.notification-enable { width: 100%; min-height: 38px; margin-bottom: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.025); color: var(--text); font: 700 11px "Manrope", sans-serif; cursor: pointer; }
@@ -879,7 +879,7 @@
 	<footer>
 		<div class="footer-inner wrap">
 			<p>© <span id="year"></span> Desconhecido MP3</p>
-			<p>Feito para quem curte jogar junto. <span>Versão 1.3.2026</span></p>
+			<p>Feito para quem curte jogar junto. <span>Versão 1.4.2026</span></p>
 		</div>
 	</footer>
 	</div>
@@ -1126,7 +1126,14 @@
 			form.addEventListener("submit", async (event) => {
 				event.preventDefault();
 				const replyText = textarea.value.trim();
-				if (!replyText || !ownerAccessToken) return;
+				if (!replyText) {
+					status.textContent = "Escreva uma resposta antes de publicar.";
+					return;
+				}
+				if (!ownerAccessToken) {
+					status.textContent = "Sua sessão expirou. Entre novamente como responsável.";
+					return;
+				}
 				button.disabled = true;
 				status.textContent = "Publicando...";
 				try {
@@ -1141,11 +1148,15 @@
 						},
 						body: JSON.stringify({ owner_reply: replyText, owner_replied_at: new Date().toISOString() })
 					});
-					if (!response.ok) throw new Error("Não foi possível publicar a resposta");
+					if (!response.ok) {
+						const result = await response.json().catch(() => ({}));
+						throw new Error(result.message || result.details || `O Supabase respondeu ${response.status}.`);
+					}
+					status.textContent = "Resposta publicada.";
 					ownerLoginStatus.textContent = "Resposta publicada.";
 					await renderFeedback();
-				} catch {
-					status.textContent = "Falha ao responder. Entre novamente e tente outra vez.";
+				} catch (error) {
+					status.textContent = error.message || "Falha ao responder. Confira sua sessão e tente novamente.";
 				} finally {
 					button.disabled = false;
 				}
@@ -1163,9 +1174,9 @@
 			showFeedbackMessage("Carregando feedbacks...");
 			let entries;
 			try {
-				const response = await fetch(`${feedbackEndpoint}?select=id,name,rating,message,created_at,owner_reply,owner_replied_at&order=created_at.desc&limit=30`, {
-					headers: { apikey: supabasePublishableKey }
-				});
+				const headers = { apikey: supabasePublishableKey };
+				if (ownerAccessToken) headers.Authorization = `Bearer ${await getValidOwnerAccessToken()}`;
+				const response = await fetch(`${feedbackEndpoint}?select=id,name,rating,message,created_at,owner_reply,owner_replied_at&order=created_at.desc&limit=30`, { headers });
 				if (!response.ok) throw new Error(`Supabase respondeu ${response.status}`);
 				entries = await response.json();
 				if (!Array.isArray(entries)) throw new Error("Resposta inválida do Supabase");
@@ -1267,21 +1278,22 @@
 			}
 			notificationReadAll.disabled = unreadEntries.length === 0;
 		};
-		const refreshNotificationPermissionButton = () => {
+		const refreshNotificationPermissionButton = (updateStatus = true) => {
 			if (!window.isSecureContext || !("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
 				notificationPermissionButton.disabled = true;
-				notificationPermissionStatus.textContent = "Push requer um navegador compatível e site hospedado em HTTPS.";
+				if (updateStatus) notificationPermissionStatus.textContent = "Push requer um navegador compatível e site hospedado em HTTPS.";
 				return;
 			}
 			if (Notification.permission === "denied") {
-				notificationPermissionButton.disabled = true;
-				notificationPermissionStatus.textContent = "Notificações bloqueadas. Altere a permissão nas configurações do navegador.";
+				notificationPermissionButton.disabled = false;
+				notificationPermissionButton.textContent = "Como permitir notificações";
+				if (updateStatus) notificationPermissionStatus.textContent = "O navegador bloqueou a permissão. Toque no botão para ver como reativá-la.";
 			} else {
 				notificationPermissionButton.disabled = false;
 				notificationPermissionButton.textContent = Notification.permission === "granted"
 					? "Sincronizar notificações neste dispositivo"
 					: "Ativar notificações neste dispositivo";
-				notificationPermissionStatus.textContent = "Você pode desativá-las nas configurações do navegador.";
+				if (updateStatus) notificationPermissionStatus.textContent = "Você pode desativá-las nas configurações do navegador.";
 			}
 		};
 		const decodePushKey = (value) => {
@@ -1294,10 +1306,30 @@
 				refreshNotificationPermissionButton();
 				return;
 			}
+			if (Notification.permission === "denied") {
+				const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+					|| (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+				notificationPermissionStatus.textContent = isIos
+					? "No iPhone ou iPad: adicione o site à Tela de Início, abra o app instalado e permita notificações em Ajustes > Notificações. No Safari, confira também Ajustes > Apps > Safari > Notificações."
+					: "A permissão está bloqueada nas configurações do navegador. Abra as informações do site na barra de endereço, permita Notificações e volte aqui.";
+				return;
+			}
+			const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+				|| (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+			const isInstalled = navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+			if (isIos && !isInstalled) {
+				notificationPermissionStatus.textContent = "No iPhone ou iPad, adicione o site à Tela de Início pelo menu Compartilhar e abra o ícone do site para ativar notificações.";
+				return;
+			}
 			notificationPermissionButton.disabled = true;
 			notificationPermissionStatus.textContent = "Preparando as notificações...";
 			let subscription;
 			try {
+				const permissionRequest = Notification.permission === "granted"
+					? Promise.resolve("granted")
+					: Notification.requestPermission();
+				const permission = await permissionRequest;
+				if (permission !== "granted") throw new Error("Permissão não concedida. Você pode ativá-la nas configurações do navegador.");
 				const configResponse = await fetch(pushSubscriptionEndpoint, {
 					method: "POST",
 					headers: { apikey: supabasePublishableKey, "Content-Type": "application/json" },
@@ -1308,10 +1340,6 @@
 				if (typeof pushConfig.vapidPublicKey !== "string" || !pushConfig.vapidPublicKey) {
 					throw new Error("A chave pública de push ainda não foi configurada no Supabase.");
 				}
-				const permission = Notification.permission === "granted"
-					? "granted"
-					: await Notification.requestPermission();
-				if (permission !== "granted") throw new Error("Permissão não concedida. Você pode ativá-la nas configurações do navegador.");
 				const registration = await navigator.serviceWorker.register("./sw.js");
 				await navigator.serviceWorker.ready;
 				subscription = await registration.pushManager.getSubscription();
@@ -1339,7 +1367,7 @@
 				}
 				notificationPermissionStatus.textContent = error.message || "Não foi possível ativar as notificações.";
 			} finally {
-				notificationPermissionButton.disabled = Notification.permission === "denied";
+				refreshNotificationPermissionButton(false);
 			}
 		});
 		refreshNotificationPermissionButton();
